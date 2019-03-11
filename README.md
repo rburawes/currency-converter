@@ -4,8 +4,12 @@ The application demonstrates the following:
 
 1. Reads the content of the XML file from the web.
 2. Loads the xml content into a database.
-3. Provide an endpoint to display the loaded data from the database.
-
+3. Displays the loaded data from the database through the following endpoints.
+   
+   - `http://<server>/rates/latest`
+   - `http://<server>/rates/{YYYY-MM-DD}` 
+   - `http://<server>/rates/analyze`
+   
 # The application flow
 1. Application starts with the file 'main.go'
 2. First it calls 'LoadData' (util/data_loader.go) function from the 'util package' to read the xml file from the given url and save it to the database.
@@ -29,7 +33,7 @@ Assuming the you have already installed Go on your local machine and cloned this
 
 # Unit tests
 
-1. All the unit tests are in the root directory of this project, every file with '_test' suffix.
+1. The unit tests are in the 'currency_converter_test.go' file.
 2. To execute the unit tests, go to the root directory via terminal or command line and just type 'go test -v' and hit enter.
 3. See sample for passing tests below:
 
