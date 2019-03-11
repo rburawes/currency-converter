@@ -15,7 +15,7 @@ const (
 	jsonType             = "application/json"
 	jsonIndexPrefix      = ""
 	jsonIndentValue      = "\t"
-	errorMsg			 = "Unable to retrieve data: "
+	errorMsg             = "Unable to retrieve data: "
 )
 
 // Index is the default page of the application.
@@ -45,7 +45,7 @@ func Rates(w http.ResponseWriter, r *http.Request) {
 		v, err := time.Parse(models.TimeFormat, param)
 
 		if err != nil {
-			http.Error(w, "Time format error encountered: " + err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Time format error encountered: "+err.Error(), http.StatusInternalServerError)
 			fmt.Println(err)
 			return
 		}
@@ -54,7 +54,7 @@ func Rates(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if param == "" {
-		http.Error(w, errorMsg + "invalid parameter", http.StatusInternalServerError)
+		http.Error(w, errorMsg+"invalid parameter", http.StatusInternalServerError)
 		fmt.Println(errorMsg + "invalid parameter")
 		return
 	}
@@ -62,7 +62,7 @@ func Rates(w http.ResponseWriter, r *http.Request) {
 	result, err := models.Get(timeInput)
 
 	if err != nil {
-		http.Error(w, errorMsg + err.Error(), http.StatusInternalServerError)
+		http.Error(w, errorMsg+err.Error(), http.StatusInternalServerError)
 		fmt.Println(err)
 		return
 	}
@@ -81,7 +81,7 @@ func Analyze(w http.ResponseWriter, r *http.Request) {
 	result, err := models.AnalyseData()
 
 	if err != nil {
-		http.Error(w, errorMsg + err.Error(), http.StatusInternalServerError)
+		http.Error(w, errorMsg+err.Error(), http.StatusInternalServerError)
 		fmt.Println(err)
 		return
 	}
@@ -94,7 +94,7 @@ func ConvertToJSON(w http.ResponseWriter, s interface{}) {
 
 	uj, err := json.MarshalIndent(s, jsonIndexPrefix, jsonIndentValue)
 	if err != nil {
-		http.Error(w, errorMsg + err.Error(), http.StatusInternalServerError)
+		http.Error(w, errorMsg+err.Error(), http.StatusInternalServerError)
 		fmt.Println(err)
 		return
 	}
