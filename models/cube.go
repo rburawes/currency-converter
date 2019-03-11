@@ -80,7 +80,11 @@ func SaveCube(c *Data) (bool, error) {
 
 	for _, data := range c.CubeData.CubeCollection {
 
-		t, _ := time.Parse(TimeFormat, data.Time)
+		t, err := time.Parse(TimeFormat, data.Time)
+
+		if err != nil {
+			return false, err
+		}
 
 		for _, cube := range data.Cube {
 			entry := CubeEntry{}
