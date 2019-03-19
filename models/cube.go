@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/rburawes/currency-converter/config"
 	"log"
 	"strconv"
@@ -16,6 +17,7 @@ const (
 )
 
 var entries []CubeEntry
+var recordCtr int64
 
 // Cube holds data for the currency and rate.
 type cube struct {
@@ -105,7 +107,16 @@ func SaveCube(c *Data) (bool, error) {
 
 	// use goroutines to save record to the database.
 	// multiple qoroutines can be used to process huge dataset
-	go inserter(stmt)
+	done := make(chan bool)
+
+	go func() {
+		inserter(stmt)
+		done <- true
+	}()
+
+	if <-done {
+		fmt.Printf("data parsed size = %d, records saved to the database: %d", len(entries), recordCtr)
+	}
 
 	return true, nil
 }
@@ -120,16 +131,17 @@ func inserter(statement string) {
 			log.Fatal(err)
 		}
 
-		_, err = stmt.Exec(entry.Currency, entry.Rate, entry.RateTime)
+		_, exErr := stmt.Exec(entry.Currency, entry.Rate, entry.RateTime)
 
-		if err != nil {
-			log.Fatal(err)
+		if exErr != nil {
+			log.Fatal(exErr)
+		} else {
+			recordCtr++
 		}
 
 		stmt.Close()
 
 	}
-
 }
 
 // Get the conversion rates based on the given date.
