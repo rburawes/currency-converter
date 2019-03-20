@@ -1,0 +1,8 @@
+{
+  "url": "localhost",
+  "username": "postgres",
+  "password": "postgres",
+  "driverName": "postgres",
+  "database": "currency",
+  "sslMode": "disable"
+}
