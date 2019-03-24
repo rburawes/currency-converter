@@ -14,7 +14,7 @@ grant all on database currency to postgres;
 create table cube
 (
   id        serial,
-  currency  character(5)  not null,
+  currency  character(3)  not null,
   rate      numeric(10,5) not null,
   rate_time timestamp     not null,
   constraint cube_pkey primary key (id)

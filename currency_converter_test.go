@@ -48,6 +48,12 @@ func TestAnalyze(t *testing.T) {
 	executeTest("/rates/analyze", controllers.Analyze, t)
 }
 
+// Tests the API that returns conversion between currencies.
+// Returns the value of GBP in USD
+func TestConversion(t *testing.T) {
+	executeTest("/convert/gbp/usd", controllers.Convert, t)
+}
+
 // Executes the test based on the given conditions.
 func executeTest(url string, f func(w http.ResponseWriter, req *http.Request), t *testing.T) {
 	// Create a request to pass to our a handler that manages latest rates API.

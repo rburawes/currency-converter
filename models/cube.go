@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/rburawes/currency-converter/config"
 	"log"
@@ -115,7 +116,7 @@ func SaveCube(c *Data) (bool, error) {
 	}()
 
 	if <-done {
-		fmt.Printf("data parsed size = %d, records saved to the database: %d", len(entries), recordCtr)
+		fmt.Printf("data parsed size = %d, records saved to the database: %d \n", len(entries), recordCtr)
 	}
 
 	return true, nil
@@ -130,7 +131,6 @@ func inserter(statement string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		_, exErr := stmt.Exec(entry.Currency, entry.Rate, entry.RateTime)
 
 		if exErr != nil {
@@ -178,6 +178,59 @@ func Get(targetTime time.Time) (CubeResult, error) {
 		dataMap[key] = value
 	}
 
+	cr.Rates = dataMap
+
+	return cr, nil
+
+}
+
+// ConvertByCurrency returns the conversion rate between currencies.
+func ConvertByCurrency(fromCurrency, toCurrency string) (CubeResult, error) {
+
+	if len(fromCurrency) == 0 {
+		return CubeResult{}, errors.New("invalid base currency")
+	}
+
+	if len(toCurrency) == 0 {
+		return CubeResult{}, errors.New("invalid target currency")
+	}
+
+	rows, err := config.Database.Query("SELECT DISTINCT c.currency, c.rate FROM cube c WHERE c.currency IN ($1, $2)", fromCurrency, toCurrency)
+
+	if err != nil {
+		return CubeResult{}, err
+	}
+
+	defer rows.Close()
+
+	cr := CubeResult{}
+	cr.Base = fromCurrency
+	var dividend float32
+	var divisor float32
+	dataMap := make(map[string]float32)
+
+	for rows.Next() {
+		var key string
+		var value float32
+		err := rows.Scan(&key, &value)
+		if err != nil {
+			return CubeResult{}, err
+		}
+
+		if key == fromCurrency {
+			divisor = value
+		}
+
+		if key == toCurrency {
+			dividend = value
+		}
+	}
+
+	if divisor <= 0 || dividend <= 0 {
+		return CubeResult{}, errors.New("unknown conversion request")
+	}
+
+	dataMap[toCurrency] = dividend / divisor
 	cr.Rates = dataMap
 
 	return cr, nil

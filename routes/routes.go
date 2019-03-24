@@ -12,6 +12,8 @@ func LoadRoutes() {
 	http.HandleFunc("/", controllers.Index)
 	// Returns the latest rates or the rates based on the passed date value.
 	http.HandleFunc("/rates/", controllers.Rates)
+	// Returns the conversion rate between two currencies.
+	http.HandleFunc("/convert/", controllers.Convert)
 	// Returns the currency analysis e.g. max, min and average for every available currency.
 	http.HandleFunc("/rates/analyze", controllers.Analyze)
 	http.Handle("/favicon.ico", http.NotFoundHandler())

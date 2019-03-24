@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/rburawes/currency-converter/models"
 	"net/http"
+	"strings"
 	"time"
 )
 
 const (
 	pathRate             = "/rates/"
+	convertPath          = "/convert/"
 	latestPath           = "latest"
 	headerContentTypeKey = "Content-Type"
 	jsonType             = "application/json"
@@ -35,14 +37,14 @@ func Rates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	param := r.URL.Path[len(pathRate):]
+	path := r.URL.Path[len(pathRate):]
 
 	// if the path param value is 'latest'
 	var timeInput time.Time
 
 	// date value has been provided in the path as param.
-	if param != latestPath && param != "" {
-		v, err := time.Parse(models.TimeFormat, param)
+	if path != latestPath && path != "" {
+		v, err := time.Parse(models.TimeFormat, path)
 
 		if err != nil {
 			http.Error(w, "Time format error encountered: "+err.Error(), http.StatusInternalServerError)
@@ -53,13 +55,42 @@ func Rates(w http.ResponseWriter, r *http.Request) {
 		timeInput = v
 	}
 
-	if param == "" {
+	if path == "" {
 		http.Error(w, errorMsg+"invalid parameter", http.StatusInternalServerError)
 		fmt.Println(errorMsg + "invalid parameter")
 		return
 	}
 
 	result, err := models.Get(timeInput)
+
+	if err != nil {
+		http.Error(w, errorMsg+err.Error(), http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	ConvertToJSON(w, result)
+
+}
+
+// Convert returns the conversion between two currencies.
+func Convert(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := r.URL.Path[len(convertPath):]
+	params := strings.Split(path, "/")
+
+	if len(params) < 2 {
+		http.Error(w, errorMsg+"invalid parameter", http.StatusInternalServerError)
+		fmt.Println(errorMsg + "invalid parameter")
+		return
+	}
+
+	result, err := models.ConvertByCurrency(strings.ToUpper(params[0]), strings.ToUpper(params[1]))
 
 	if err != nil {
 		http.Error(w, errorMsg+err.Error(), http.StatusInternalServerError)
